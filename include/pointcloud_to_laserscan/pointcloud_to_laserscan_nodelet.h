@@ -77,7 +77,8 @@ namespace pointcloud_to_laserscan
     void disconnectCb();
 
     ros::NodeHandle nh_, private_nh_;
-    ros::Publisher pub_;
+    ros::Publisher marking_pub_;
+    ros::Publisher clearing_pub_;
     boost::mutex connect_mutex_;
 
     boost::shared_ptr<tf2_ros::Buffer> tf2_;
@@ -89,8 +90,8 @@ namespace pointcloud_to_laserscan
     unsigned int input_queue_size_;
     std::string target_frame_;
     double tolerance_;
-    double min_height_, max_height_, angle_min_, angle_max_, angle_increment_, scan_time_, range_min_, range_max_;
-    bool use_inf_;
+    double min_marking_height_, max_marking_height_, min_height_, angle_min_, angle_max_, angle_increment_, scan_time_, range_min_, range_max_, min_clearing_height_;
+    bool use_inf_, use_marking_scan_, use_clearing_scan_;
   };
 
 }  // pointcloud_to_laserscan
