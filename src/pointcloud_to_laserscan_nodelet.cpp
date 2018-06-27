@@ -137,17 +137,7 @@ namespace pointcloud_to_laserscan
   void PointCloudToLaserScanNodelet::connectCb()
   {
     boost::mutex::scoped_lock lock(connect_mutex_);
-    int num_subscribers = 0;
-    if (use_marking_scan_)
-    {
-      num_subscribers += marking_pub_.getNumSubscribers();
-    }
-
-    if (use_clearing_scan_)
-    {
-      num_subscribers += clearing_pub_.getNumSubscribers();
-    }
-
+    int num_subscribers = marking_pub_.getNumSubscribers() + clearing_pub_.getNumSubscribers();
     if (num_subscribers > 0 && sub_.getSubscriber().getNumPublishers() == 0)
     {
       NODELET_INFO("Got a subscriber to scan, starting subscriber to pointcloud");
@@ -158,17 +148,7 @@ namespace pointcloud_to_laserscan
   void PointCloudToLaserScanNodelet::disconnectCb()
   {
     boost::mutex::scoped_lock lock(connect_mutex_);
-    int num_subscribers = 0;
-    if (use_marking_scan_)
-    {
-      num_subscribers += marking_pub_.getNumSubscribers();
-    }
-
-    if (use_clearing_scan_)
-    {
-      num_subscribers += clearing_pub_.getNumSubscribers();
-    }
-
+    int num_subscribers = marking_pub_.getNumSubscribers() + clearing_pub_.getNumSubscribers();
     if (num_subscribers == 0)
     {
       NODELET_INFO("No subscibers to scan, shutting down subscriber to pointcloud");
