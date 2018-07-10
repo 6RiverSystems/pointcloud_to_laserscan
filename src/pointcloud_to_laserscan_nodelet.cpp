@@ -119,13 +119,19 @@ namespace pointcloud_to_laserscan
       sub_.registerCallback(boost::bind(&PointCloudToLaserScanNodelet::cloudCb, this, _1));
     }
 
-    marking_pub_ = nh_.advertise<sensor_msgs::LaserScan>("marking_scan", 10,
-                                                 boost::bind(&PointCloudToLaserScanNodelet::connectCb, this),
-                                                 boost::bind(&PointCloudToLaserScanNodelet::disconnectCb, this));
+    if(use_marking_scan_)
+    {
+      marking_pub_ = nh_.advertise<sensor_msgs::LaserScan>("marking_scan", 10,
+                            boost::bind(&PointCloudToLaserScanNodelet::connectCb, this),
+                            boost::bind(&PointCloudToLaserScanNodelet::disconnectCb, this));
+    }
 
-    clearing_pub_ = nh_.advertise<sensor_msgs::LaserScan>("clearing_scan", 10,
-                                                         boost::bind(&PointCloudToLaserScanNodelet::connectCb, this),
-                                                         boost::bind(&PointCloudToLaserScanNodelet::disconnectCb, this));
+    if(use_clearing_scan_)
+    {
+      clearing_pub_ = nh_.advertise<sensor_msgs::LaserScan>("clearing_scan", 10,
+                            boost::bind(&PointCloudToLaserScanNodelet::connectCb, this),
+                            boost::bind(&PointCloudToLaserScanNodelet::disconnectCb, this));
+    }
   }
 
   void PointCloudToLaserScanNodelet::connectCb()
