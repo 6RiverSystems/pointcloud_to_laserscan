@@ -98,7 +98,7 @@ namespace pointcloud_to_laserscan
     // Only queue one pointcloud per running thread
     if (concurrency_level > 0)
     {
-      input_queue_size_ = concurrency_level;
+      input_queue_size_ = static_cast<unsigned int>(concurrency_level);
     }
     else
     {
@@ -137,7 +137,7 @@ namespace pointcloud_to_laserscan
   void PointCloudToLaserScanNodelet::connectCb()
   {
     boost::mutex::scoped_lock lock(connect_mutex_);
-    int num_subscribers = marking_pub_.getNumSubscribers() + clearing_pub_.getNumSubscribers();
+    int num_subscribers = static_cast<int>(marking_pub_.getNumSubscribers() + clearing_pub_.getNumSubscribers());
     if (num_subscribers > 0 && sub_.getSubscriber().getNumPublishers() == 0)
     {
       NODELET_INFO("Got a subscriber to scan, starting subscriber to pointcloud");
@@ -148,7 +148,7 @@ namespace pointcloud_to_laserscan
   void PointCloudToLaserScanNodelet::disconnectCb()
   {
     boost::mutex::scoped_lock lock(connect_mutex_);
-    int num_subscribers = marking_pub_.getNumSubscribers() + clearing_pub_.getNumSubscribers();
+    int num_subscribers = static_cast<int>(marking_pub_.getNumSubscribers() + clearing_pub_.getNumSubscribers());
     if (num_subscribers == 0)
     {
       NODELET_INFO("No subscibers to scan, shutting down subscriber to pointcloud");
@@ -196,7 +196,7 @@ namespace pointcloud_to_laserscan
     }
     else
     {
-      marking_output.ranges.assign(ranges_size, marking_output.range_max + 1.0);
+      marking_output.ranges.assign(ranges_size, marking_output.range_max + 1.0f);
     }
 
     // Initialize with value to signal that no data was seen
@@ -234,46 +234,46 @@ namespace pointcloud_to_laserscan
 
       if (std::isnan(*iter_x) || std::isnan(*iter_y) || std::isnan(*iter_z))
       {
-        NODELET_DEBUG("rejected for nan in point(%f, %f, %f)\n", *iter_x, *iter_y, *iter_z);
+        NODELET_DEBUG("rejected for nan in point(%f, %f, %f)\n", static_cast<double>(*iter_x), static_cast<double>(*iter_y), static_cast<double>(*iter_z));
         continue;
       }
 
-      if (*iter_z > max_marking_height_ || *iter_z < min_height_)
+      if (static_cast<double>(*iter_z) > max_marking_height_ || static_cast<double>(*iter_z) < min_height_)
       {
-        NODELET_DEBUG("rejected for height %f not in range (%f, %f)\n", *iter_z, min_height_, max_marking_height_);
+        NODELET_DEBUG("rejected for height %f not in range (%f, %f)\n", static_cast<double>(*iter_z), min_height_, max_marking_height_);
         continue;
       }
 
-      double range = hypot(*iter_x, *iter_y);
+      double range = hypot(static_cast<double>(*iter_x), static_cast<double>(*iter_y));
       if (range < range_min_)
       {
-        NODELET_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range, range_min_, *iter_x, *iter_y,
-                      *iter_z);
+        NODELET_DEBUG("rejected for range %f below minimum value %f. Point: (%f, %f, %f)", range, range_min_, static_cast<double>(*iter_x), static_cast<double>(*iter_y),
+                      static_cast<double>(*iter_z));
         continue;
       }
 
-      double angle = atan2(*iter_y, *iter_x);
-      if (angle < marking_output.angle_min || angle > marking_output.angle_max)
+      double angle = atan2(static_cast<double>(*iter_y), static_cast<double>(*iter_x));
+      if (angle < static_cast<double>(marking_output.angle_min) || angle > static_cast<double>(marking_output.angle_max))
       {
-        NODELET_DEBUG("rejected for angle %f not in range (%f, %f)\n", angle, marking_output.angle_min, marking_output.angle_max);
+        NODELET_DEBUG("rejected for angle %f not in range (%f, %f)\n", angle, static_cast<double>(marking_output.angle_min), static_cast<double>(marking_output.angle_max));
         continue;
       }
 
       //overwrite range at laserscan ray if new range is smaller
-      int index = (angle - marking_output.angle_min) / marking_output.angle_increment;
+      int index = (angle - static_cast<double>(marking_output.angle_min)) / static_cast<double>(marking_output.angle_increment);
 
-      if (*iter_z > min_marking_height_ && range < marking_output.ranges[index]) {
-        marking_output.ranges[index] = range;
+      if (static_cast<double>(*iter_z) > min_marking_height_ && range < static_cast<double>(marking_output.ranges[static_cast<size_t>(index)])) {
+        marking_output.ranges[static_cast<size_t>(index)] = static_cast<float>(range);
       }
 
-      if (use_clearing_scan_ && *iter_z < min_marking_height_ && range > clearing_output.ranges[index]) {
-        clearing_output.ranges[index] = range;
+      if (use_clearing_scan_ && static_cast<double>(*iter_z) < min_marking_height_ && range > static_cast<double>(clearing_output.ranges[static_cast<size_t>(index)])) {
+        clearing_output.ranges[static_cast<size_t>(index)] = static_cast<float>(range);
       }
     }
 
     // merge the marking scan into the clearing scan
     if (use_clearing_scan_) {
-      for (uint32_t index = 0; index < clearing_output.ranges.size(); index++) {
+      for (std::size_t index = 0; index < clearing_output.ranges.size(); index++) {
         if (marking_output.ranges[index] < clearing_output.ranges[index]) {
           clearing_output.ranges[index] = marking_output.ranges[index];
         }
