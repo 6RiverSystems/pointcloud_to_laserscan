@@ -55,7 +55,7 @@ int main(int argc, char **argv){
 
   boost::shared_ptr<ros::MultiThreadedSpinner> spinner;
   if(concurrency_level) {
-    spinner.reset(new ros::MultiThreadedSpinner(concurrency_level));
+    spinner.reset(new ros::MultiThreadedSpinner(static_cast<unsigned int>(concurrency_level)));
   }else{
     spinner.reset(new ros::MultiThreadedSpinner());
   }
